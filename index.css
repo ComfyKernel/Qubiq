@@ -1,0 +1,42 @@
+:root {
+    /* Terminal colors - mix of XTerm, mIRC, and Ubuntu colors */
+
+    --terminal-background    : rgb(  0,   0,   0);
+    --terminal-foreground    : rgb(204, 204, 204);
+    
+    --terminal-color-black   : rgb(  0,   0,   0); /* Anything, really */
+    --terminal-color-red     : rgb(205,   0,   0); /* XTerm  */
+    --terminal-color-green   : rgb( 57, 181,  74); /* Ubuntu */
+    --terminal-color-yellow  : rgb(252, 127,   0); /*  mIRC  */
+    --terminal-color-blue    : rgb(  0,   0, 127); /*  mIRC  */
+    --terminal-color-magenta : rgb(205,   0, 205); /* XTerm  */
+    --terminal-color-cyan    : rgb(  0, 205, 205); /* XTerm  */
+    --terminal-color-white   : rgb(204, 204, 204); /* Ubuntu */
+    
+    --terminal-color-bright-black   : rgb(128, 128, 128); /* Ubuntu          */
+    --terminal-color-bright-red     : rgb(255,   0,   0); /* Again, Anything */
+    --terminal-color-bright-green   : rgb(  0, 252,   0); /* mIRC            */
+    --terminal-color-bright-yellow  : rgb(255, 255,   0); /* Annyytthhiing   */
+    --terminal-color-bright-blue    : rgb(  0,   0, 252); /* mIRC            */
+    --terminal-color-bright-magenta : rgb(255,   0, 255); /* Muh'Anything    */
+    --terminal-color-bright-cyan    : rgb(  0, 255, 255); /* Anythink        */
+    --terminal-color-bright-white   : rgb(255, 255, 255); /* Burnt Eyes      */
+}
+
+#dev-console {
+    overflow : y;
+
+    position : fixed;
+    
+    width    : 500pt;
+    height   : 100%;
+
+    right    : -500pt;
+    top      : 0;
+
+    border-width        : 0;
+    background-color    : var(--terminal-background);
+    color               : var(--terminal-foreground);
+    
+    transition-duration : 0.5s;
+}
