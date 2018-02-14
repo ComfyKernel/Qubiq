@@ -8,7 +8,31 @@
   </head>
   <body>
     <code id="dev-console">
-      
+      <input type="button"  id="dev-console-grabber" onclick="toggleMenu('dev-console');">
     </code>
+
+    <script>
+      var menus = [];
+
+      function addMenu(id) {
+        menus[name] = false;
+      }
+
+      function toggleMenu(id) {
+        if(!menus[id]) {
+          document.getElementById(id).classList.add(id+"-open");
+          menus[id] = true;
+        } else {
+          document.getElementById(id).classList.remove(id+"-open");
+          menus[id] = false;
+        }
+      }
+
+      addMenu("dev-console");
+    </script>
+
+    <script src="deps/gl-matrix-min.js"></script>
+    <script src="gl.js"                ></script>
+    <script src="main.js"              ></script>
   </body>
 </html>
