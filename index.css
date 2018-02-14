@@ -23,6 +23,10 @@
     --terminal-color-bright-white   : rgb(255, 255, 255); /* Burnt Eyes      */
 }
 
+#game-window {
+    position : absolute;
+}
+
 #dev-console {
     overflow : y;
 
@@ -37,6 +41,7 @@
     border-width        : 0;
     background-color    : var(--terminal-background);
     color               : var(--terminal-foreground);
+    white-space         : pre;
     
     transition-duration : 0.5s;
 }
