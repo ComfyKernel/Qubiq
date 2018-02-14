@@ -25,6 +25,15 @@
 
 #game-window {
     position : absolute;
+
+    width    : 100%;
+    height   : 100%;
+
+    left     : 0;
+    top      : 0;
+
+    border-width     : 0;
+    background-color : #999999;
 }
 
 #dev-console {
