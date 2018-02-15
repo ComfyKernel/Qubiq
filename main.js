@@ -10,9 +10,9 @@ var world = {
 	    depth  : 16
 	},
 
-	width  : 1,
+	width  : 10,
 	height : 1,
-	depth  : 1
+	depth  : 10
     },
 
     newChunk : function(PX, PY, PZ) {
@@ -23,57 +23,87 @@ var world = {
 		
 	    }
 	};
-
+	
 	var width  = this.dimensions.chunk.width;
 	var height = this.dimensions.chunk.height;
 	var depth  = this.dimensions.chunk.depth;
+
+	for(var i = 0; i < width; ++i) {
+	    for(var j = 0; j < height; ++j) {
+		for(var k = 0; k < depth; ++k) {
+		    if(j > (Math.sin((PX + i) / 10.0) * 10.0) + (Math.cos((PZ + k) / 10.0) * 10.0)) {
+			_out.data[i + (j * width) + (k * width * height)]
+			    = 0;
+		    } else {
+			_out.data[i + (j * width) + (k * width * height)]
+			    = 1;
+		    }
+		}
+	    }
+	}
 
 	var vertices = [],
 	    indices  = [],
 	    uvs      = [];
 
-	for(var i = 0; i < 2; ++i) {
-	    var index = vertices.length;
-	    
-	    vertices.push(i);
-	    vertices.push(0);
-	    vertices.push(0);
+	function pushFace(pX, pY, pZ, rX, rY, rZ, uX, uY, uZ, flipped) {
+	    var index = vertices.length / 3;
 
-	    vertices.push(i + 1);
-	    vertices.push(0);
-	    vertices.push(0);
+	    Array.prototype.push.apply(vertices,
+				       [pX          , pY          , pZ,
+					pX + rX     , pY + rY     , pZ + rZ,
+				        pX + rX + uX, pY + rY + uY, pZ + rZ + uZ,
+				        pX + uX     , pY + uY     , pZ + uZ      ]);
 
-	    vertices.push(i + 1);
-	    vertices.push(0);
-	    vertices.push(0 + 1);
+	    Array.prototype.push.apply(uvs,
+				       [0, 0,
+				        1, 0,
+				        1, 1,
+				        0, 1 ]);
 
-	    vertices.push(i);
-	    vertices.push(0);
-	    vertices.push(0 + 1);
-
-	    uvs.push(0);
-	    uvs.push(0);
-	    
-	    uvs.push(1);
-	    uvs.push(0);
-	    
-	    uvs.push(1);
-	    uvs.push(1);
-
-	    uvs.push(0);
-	    uvs.push(1);
-
-	    indices.push(index);
-	    indices.push(index + 1);
-	    indices.push(index + 2);
-	    
-	    indices.push(index + 2);
-	    indices.push(index + 3);
-	    indices.push(index);
+	    if(flipped) {
+		Array.prototype.push.apply(indices, [index + 2, index + 1, index,
+						     index, index + 3, index + 2]);
+	    } else {
+		Array.prototype.push.apply(indices, [index, index + 1, index + 2,
+						     index + 2, index + 3, index ]);
+	    }
 	}
 
-	console.log(vertices.length);
-	
+	function isEmpty(pX, pY, pZ) {
+	    if(pX > width || pY > height || pZ > depth) return false;
+	    
+	    return (_out.data[pX + (pY * width) + (pZ * width * height)] == 0);
+	}
+
+	for(var i = 0; i < width; ++i) {
+	    for(var j = 0; j < height; ++j) {
+		for(var k = 0; k < depth; ++k) {
+		    if(_out.data[i + (j * width) + (k * width * depth)]) {
+			if(isEmpty(i, j - 1, k)) pushFace(PX + i, PY + j, PZ + k,
+							  1, 0, 0,
+							  0, 0, 1, false);
+			if(isEmpty(i, j + 1, k)) pushFace(PX + i, PY + j + 1, PZ + k,
+							  1, 0, 0,
+							  0, 0, 1, true);
+
+			if(isEmpty(i, j, k + 1)) pushFace(PX + i, PY + j, PZ + k + 1,
+							  0, 1, 0,
+							  1, 0, 0, true);
+			if(isEmpty(i, j, k - 1)) pushFace(PX + i, PY + j, PZ + k,
+							  0, 1, 0,
+							  1, 0, 0, false);
+
+			if(isEmpty(i + 1, j, k)) pushFace(PX + i + 1, PY + j, PZ + k,
+							  0, 1, 0,
+							  0, 0, 1, false);
+			if(isEmpty(i - 1, j, k)) pushFace(PX + i, PY + j, PZ + k,
+							  0, 1, 0,
+							  0, 0, 1, true);
+		    }
+		}
+	    }
+	}
 	_out.buffers.vertex = gelly.newBuffer(vertices, Float32Array,
 					      gelly.ARRAY_BUFFER,
 					      gelly.STATIC_DRAW);
