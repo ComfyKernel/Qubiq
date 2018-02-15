@@ -15,6 +15,20 @@ var world = {
 	depth  : 10
     },
 
+    findChunk: function(pos) {
+	for(var c = 0; c < world.chunks.length; ++c) {
+	    var i = world.chunks[c];
+	    
+	    if(pos.x == i.pos.x &&
+	       pos.y == i.pos.y &&
+	       pos.z == i.pos.z) {
+		return world.chunks[i];
+	    }
+	}
+
+	return null;
+    },
+    
     newChunk : function(PX, PY, PZ) {
 	var _out = {
 	    data : [],
@@ -23,21 +37,29 @@ var world = {
 		
 	    }
 	};
+
+	_out.pos = { x : PX,
+		     y : PY,
+		     z : PZ };
 	
 	var width  = this.dimensions.chunk.width;
 	var height = this.dimensions.chunk.height;
 	var depth  = this.dimensions.chunk.depth;
 
+	function genData(x, y, z) {
+	    if(j > (Math.sin((PX + x) / 10.0) * 10.0)
+	         + (Math.cos((PY + y) / 10.0) * 10.0)) {
+		return 0;
+	    } else {
+		return 1;
+	    }
+	}
+	
 	for(var i = 0; i < width; ++i) {
 	    for(var j = 0; j < height; ++j) {
 		for(var k = 0; k < depth; ++k) {
-		    if(j > (Math.sin((PX + i) / 10.0) * 10.0) + (Math.cos((PZ + k) / 10.0) * 10.0)) {
-			_out.data[i + (j * width) + (k * width * height)]
-			    = 0;
-		    } else {
-			_out.data[i + (j * width) + (k * width * height)]
-			    = 1;
-		    }
+		    _out.data[i + (j * width) + (k * width * height)]
+			= genData(i, j, k);
 		}
 	    }
 	}
@@ -71,7 +93,29 @@ var world = {
 	}
 
 	function isEmpty(pX, pY, pZ) {
-	    if(pX > width || pY > height || pZ > depth) return false;
+	    if(pX >= width || pY >= height || pZ >= depth ||
+	       pX <  0     || pY <  0      || pZ < 0        ) {
+		var chunk = world.findChunk(Math.ceil((pX + PX) / width ) * width,
+					    Math.ceil((pY + PY) / height) * height,
+					    Math.ceil((pZ + PZ) / depth ) * depth);
+		if(!chunk) {
+		    return false;
+		} else {
+		    var cpx = 0,
+			cpy = 0,
+			cpz = 0;
+
+		    if(pX >= width ) cpx = pX - width;
+		    if(pY >= height) cpy = pY - height;
+		    if(pZ >= depth ) cpz = pZ - depth;
+
+		    if(pX < 0) cpx = width  + pX;
+		    if(pY < 0) cpy = height + pY;
+		    if(pZ < 0) cpz = depth  + pZ;
+
+		    return chunk.data[cpx + (cpy * width) + (cpz * width * height)] == 0;
+		}
+	}
 	    
 	    return (_out.data[pX + (pY * width) + (pZ * width * height)] == 0);
 	}
