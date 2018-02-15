@@ -64,7 +64,15 @@ var __console = (function(o_console, d_element) {
 }(window.console, document.getElementById("dev-console")));
 
 window.console = __console;
- 
+
+function radians(degs) {
+    return degs * (Math.PI / 180);
+}
+
+function degrees(rads) {
+    return rads * (180 / Math.PI);
+}
+
 var gelly =  { // OpenGL Puns are the best
     setCanvas: function(id) {
 	this.obj = document.getElementById(id);
@@ -76,6 +84,10 @@ var gelly =  { // OpenGL Puns are the best
 	    return false;
 	}
 
+	this.obj.addEventListener("mousedown", function() {
+	    this.requestPointerLock();
+	}, true);
+
 	this.ARRAY_BUFFER    = this.gl.ARRAY_BUFFER;
 	this.ELEMENT_BUFFER  = this.gl.ELEMENT_ARRAY_BUFFER;
 
@@ -84,6 +96,40 @@ var gelly =  { // OpenGL Puns are the best
 
 	this.VERTEX_SHADER   = this.gl.VERTEX_SHADER;
 	this.FRAGMENT_SHADER = this.gl.FRAGMENT_SHADER;
+
+	gelly.obj.width  = gelly.obj.clientWidth;
+	gelly.obj.height = gelly.obj.clientHeight;
+	gelly.gl.viewport(0, 0, gelly.obj.width, gelly.obj.height);
+
+	this.aspect = gelly.obj.width / gelly.obj.height;
+
+	this.mouse = {
+	    x : 0,
+	    y : 0,
+
+	    movement : {
+		x : 0,
+		y : 0
+	    }
+	};
+
+	this.key = [];
+
+	this.obj.addEventListener("mousemove", function(event) {
+	    gelly.mouse.x = event.pageX;
+	    gelly.mouse.y = event.pageY;
+
+	    gelly.mouse.movement.x = event.movementX;
+	    gelly.mouse.movement.y = event.movementY;
+	}, true);
+	
+	this.obj.addEventListener("keydown", function(event) {
+	    gelly.key[event.key] = true;
+	}, false);
+
+	this.obj.addEventListener("keyup", function(event) {
+	    gelly.key[event.key] = false;
+	}, false);
 
 	return true;
     },
@@ -228,3 +274,12 @@ var gelly =  { // OpenGL Puns are the best
 	gl = this.gl;
     }
 };
+
+
+window.addEventListener("resize", function() {
+    gelly.obj.width  = gelly.obj.clientWidth;
+    gelly.obj.height = gelly.obj.clientHeight;
+    gelly.gl.viewport(0, 0, gelly.obj.width, gelly.obj.height);
+
+    gelly.aspect = gelly.obj.width / gelly.obj.height;
+}, true);
