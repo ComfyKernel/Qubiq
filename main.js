@@ -1,12 +1,13 @@
 
 
+
 var world = {
     chunks : [],
 
     dimensions : {
 	chunk  : {
 	    width  : 16,
-	    height : 16,
+	    height : 64,
 	    depth  : 16
 	},
 
@@ -25,7 +26,7 @@ var world = {
 		return world.chunks[i];
 	    }
 	}
-
+	
 	return null;
     },
     
@@ -35,6 +36,12 @@ var world = {
 
 	    buffers : {
 		
+	    },
+
+	    destroy : function() {
+		this.buffers.uv.destroy();
+		this.buffers.index.destroy();
+		this.buffers.vertex.destroy();
 	    }
 	};
 
@@ -47,8 +54,8 @@ var world = {
 	var depth  = this.dimensions.chunk.depth;
 
 	function genData(x, y, z) {
-	    if(j > (Math.sin((PX + x) / 10.0) * 10.0)
-	         + (Math.cos((PY + y) / 10.0) * 10.0)) {
+	    if(PY + j > ((Math.sin((PX + x) / 10.0) + 1) * 10.0)
+	              + ((Math.cos((PZ + z) / 10.0) + 1) * 10.0)) {
 		return 0;
 	    } else {
 		return 1;
@@ -99,7 +106,7 @@ var world = {
 					    Math.ceil((pY + PY) / height) * height,
 					    Math.ceil((pZ + PZ) / depth ) * depth);
 		if(!chunk) {
-		    return false;
+		    return genData(pX, pY, pZ) == 0;
 		} else {
 		    var cpx = 0,
 			cpy = 0,
@@ -115,7 +122,7 @@ var world = {
 
 		    return chunk.data[cpx + (cpy * width) + (cpz * width * height)] == 0;
 		}
-	}
+	    }
 	    
 	    return (_out.data[pX + (pY * width) + (pZ * width * height)] == 0);
 	}
@@ -123,7 +130,7 @@ var world = {
 	for(var i = 0; i < width; ++i) {
 	    for(var j = 0; j < height; ++j) {
 		for(var k = 0; k < depth; ++k) {
-		    if(_out.data[i + (j * width) + (k * width * depth)]) {
+		    if(_out.data[i + (j * width) + (k * width * height)]) {
 			if(isEmpty(i, j - 1, k)) pushFace(PX + i, PY + j, PZ + k,
 							  1, 0, 0,
 							  0, 0, 1, false);
@@ -177,6 +184,47 @@ var world = {
 		}
 	    }
 	}
+    },
+
+    genLoop : function(X, Z, R) {
+	for(var c = 0; c < this.chunks.length; ++c) {
+	    var px = this.chunks[c].pos.x;
+	    var pz = this.chunks[c].pos.y;
+		
+	    var a = X - px;
+	    var b = Z - pz;
+	    
+	    if(Math.sqrt((a*a)+(b*b)) > R) {
+		this.chunks[c].destroy();
+
+		console.log("Chunk destroyed");
+
+		console.log(this.chunks.length);
+		this.chunks.splice(this.chunks.indexOf(this.chunks[c]), 1);
+		console.log("[] " + this.chunks.length);
+	    }
+	}
+
+	for(var x = X - R; x < X + R; x+= this.dimensions.chunk.width) {
+	    for(var z = Z - R; z < Z + R; z+= this.dimensions.chunk.depth) {
+		var px = Math.floor(x / this.dimensions.chunk.width) * this.dimensions.chunk.width;
+		var pz = Math.floor(z / this.dimensions.chunk.depth) * this.dimensions.chunk.depth;
+		
+		var a = X - px;
+		var b = Z - pz;
+		
+		if(Math.sqrt((a*a)+(b*b)) > R) continue;
+
+		var dat = this.findChunk({x: px, y: 0, z: pz});
+
+		if(dat === null) {
+		    console.log("Chunk Created");
+		    
+		    this.chunks.push(
+			world.newChunk(px, 0, pz));
+		}
+	    }
+	}
     }
 };
 
@@ -204,8 +252,6 @@ gelly.gl.enable   (gelly.gl.DEPTH_TEST);
 gelly.gl.depthFunc(gelly.gl.LESS);
 
 gelly.gl.enable   (gelly.gl.CULL_FACE);
-
-world.genWorld();
     
 var vbuff = gelly.newBuffer([0.0, 0.0, 0.0,
 			     0.0, 1.0, 0.0,
@@ -346,6 +392,8 @@ function main() {
 					 -cam.position.y,
 					 -cam.position.z));
 
+    world.genLoop(cam.position.x, cam.position.z, 128);
+    
     mat4.copy(PVM, P);
     mat4.mul(PVM, PVM, V);
     mat4.mul(PVM, PVM, M);

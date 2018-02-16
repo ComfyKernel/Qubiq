@@ -156,16 +156,6 @@ var gelly =  { // OpenGL Puns are the best
 
 	    destroy       : function() {
 		gelly.gl.deleteBuffer(this.name);
-
-		delete this.name;
-		
-		delete this.dataType;
-		delete this.bufferType;
-		delete this.drawType;
-
-		delete this.bind;
-		delete this.bufferData;
-		delete this.bufferSubData;
 	    },
 
 	    bufferData    : function(b_data) {
@@ -207,13 +197,6 @@ var gelly =  { // OpenGL Puns are the best
 
 	    destroy: function() {
 		gelly.gl.deleteShader(this.name);
-
-		delete this.name
-		
-		delete this.shaderType;
-
-		delete this.source;
-		delete this.compile;
 	    }
 	};
 
